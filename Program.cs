@@ -5,72 +5,118 @@ namespace puic {
     public class Program {
         static void Main(string[] args)
         {
-            Console.WriteLine("Welcome!");
-            var start = true;
-            while (start) {
-                Console.WriteLine("Would you like to search for a holiday?");
-                var cont = Console.ReadLine();
-                try {
-                     start = CheckContinue(cont ?? "");
-                     if (!start) {
-                         Console.WriteLine("Goodbye!");
-                         Environment.Exit(0);
-                     } else {
-                         var logged = Login();
-                         if (logged) {
+            Console.WriteLine("Welcome to PUIC Holidays!");
+            var loop = false;
+            Console.WriteLine("Would you like to search for a holiday?");
+            var cont = Console.ReadLine();
+            try {
+                var shouldCont = CheckContinue(cont ?? "");
+                if (!shouldCont) {
+                    Console.WriteLine("Goodbye!");
+                    Environment.Exit(0);
+                } else {
+                    do {
+                        var loggedIn = Login();
+                        if (loggedIn) {
+                            loop = false;
                             var dests =  new List<string>(){"Nigeria", "Argentina", "Canada", "Israel", "Mexico", "Germany", "Japan", "Italy", "Spain", "France", "India", "Ukraine", "Poland", "Britain", "South Africa", "Pakistan"};
                             Console.WriteLine("Choose from the following destinations:");
-                            
+                
                             var count = 1;
                             foreach (var dest in dests)
                             {
                                 Console.WriteLine($"{count}. {dest}");
                                 count++;
                             }
-                            Console.WriteLine("Give the number that corresponds to the destination of your choice");
-                            int choice = 0;
-                            try {
-                                var parsed = Int32.TryParse(Console.ReadLine(), out choice);
-                            }
-                            catch (Exception e) {
-                                Console.WriteLine($"Error: {e.Message}");
-                            }
-                            if (choice < 1 || choice > dests.Count()) {
-                                Console.WriteLine("Invalid input!");
-                            }
-                            var chosen = dests.ElementAt(count + 1);
-                            Console.WriteLine($"You have selected {chosen}. Now choose the dates");
-                            Console.WriteLine("Choose beginning date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
-                            var beginStr = Console.ReadLine();
-                            var beginFormat = GetDateFormat(beginStr ?? "");
-                            var beginDate = ParseDate(beginStr ?? "", beginFormat);
-                            Console.WriteLine("Choose ending date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
-                            var endStr = Console.ReadLine();
-                            var endFormat = GetDateFormat(endStr ?? "");
-                            var endDate = ParseDate(endStr ?? "", endFormat);
-                            Package package;
-                            try {
-                                package = GetPackage(beginDate, endDate);
-                                int cost = Cost(package);
-                                Console.WriteLine($"You have successfully reserved a {PackageName(package)} at PUIC Holidays. Make sure you pay the stipulated sum of {cost} within 7 days");
-                                Environment.Exit(0);
-                            }
-                            catch (Exception e) {
-                                Console.WriteLine($"Error: {e.Message}");
-                            }
-
                             
-                         }
-                         
-                     }
+                            var again = false;
+                            do {
+                                Console.WriteLine("Give the number that corresponds to the destination of your choice");
+                                int choice = 0;
+                                try {
+                                    var parsed = Int32.TryParse(Console.ReadLine(), out choice);
+                                    Console.WriteLine(choice);
+                                }
+                                catch (Exception e) {
+                                    Console.WriteLine($"Error: {e.Message}");
+                                }
+                                if (choice < 1 || choice > dests.Count()) {
+                                    Console.WriteLine("You didn't quite get that right!, Your choice is out of bounds. Try again");
+                                    again = true;
+                                } else {
+                                    again = false;
+                                    var chosen = dests[choice-1];
+                                    Console.WriteLine($"You have selected {chosen}. Now choose the dates");
+                                    var dateAgain = false;
+                                    string? beginStr = "";
+                                    DateFormat beginFormat;
+                                    do {
+                                        Console.WriteLine("Choose beginning date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
+                                        beginStr = Console.ReadLine();
+                                        beginFormat = GetDateFormat(beginStr ?? "");
+                                        if (beginFormat == DateFormat.Invalid) {
+                                            Console.WriteLine("Invalid Date selected, please try again");
+                                            dateAgain = true;
+                                        } else {
+                                            dateAgain = false;
+                                        }
+                                    } while (dateAgain);
+                                    var beginDate = ParseDate(beginStr ?? "", beginFormat);
 
+                                    var dateAgain2 = false;
+                                    string? endStr = "";
+                                    DateFormat endFormat;
+                                    do {
+                                        Console.WriteLine("Choose ending date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
+                                        endStr = Console.ReadLine();
+                                        endFormat = GetDateFormat(endStr ?? "");
+                                        if (endFormat == DateFormat.Invalid) {
+                                            Console.WriteLine("Invalid Date selected, please try again");
+                                            dateAgain2 = true;
+                                        } else {
+                                            dateAgain2 = false;
+                                        }
+                                    } while (dateAgain2);
+                                    var endDate = ParseDate(endStr ?? "", endFormat);
+
+                                    Package package;
+                                    try {
+                                        package = GetPackage(beginDate, endDate);
+                                        if (package == Package.SeniorCitizens) {
+                                            Console.WriteLine("Please input your age");
+                                            int age;
+                                            bool parsed = Int32.TryParse(Console.ReadLine(), out age);
+                                            if (age <= 60) {
+                                                Console.WriteLine("You are not qualified for this package \nGoodbye!");
+                                                Environment.Exit(0);
+                                            }
+                                        }
+                                        int cost = Cost(package);
+                                        Console.WriteLine($"You have successfully reserved a {PackageName(package)} spot at PUIC Holidays. \nYour destination is {chosen} \nMake sure you pay the stipulated sum of £{cost} within 7 days");
+                                        Environment.Exit(0);
+                                    }
+                                    catch (Exception e) {
+                                        Console.WriteLine($"Error: {e.Message}");
+                                    }
+                                }
+                            } while (again);
+                                
+                        } else {
+                            Console.WriteLine("Wrong username or password, check the format");
+                            loop = true;
+                            continue;
+                        }
+                    } while (loop);
+                         
                 }
-                catch (ArgumentException e) {
-                    Console.WriteLine($"Error: {e.Message}");
-                }
+
+            }
+            catch (ArgumentException e) {
+                Console.WriteLine($"Error: {e.Message}");
             }
         }
 
+        // PackageName returns the name of the Package based on the package type, e.g. "Mini"
         static string PackageName(Package p) {
             string packageName;
             switch (p)
@@ -91,6 +137,7 @@ namespace puic {
             return packageName;
         }
 
+        // GetPackage gives the Package enum option based on the date intervals. throws exception if the date is invalid 
         static Package GetPackage(DateOnly begin, DateOnly end) {
             Package package;
             switch (end.DayNumber - begin.DayNumber)
@@ -111,6 +158,8 @@ namespace puic {
             }
             return package;
         }
+        
+        // Cost determines the cost of the package based on the Package type
         static int Cost (Package p)
         {
             int c;
@@ -132,6 +181,9 @@ namespace puic {
             
             return c;
         }    
+       
+       // GetDateFormat gets the format used by the user to specify their dates, depending on the character used to divide.
+       // it can be invalid
         static DateFormat GetDateFormat(string s) {
             s = s.Trim();
             string slashPattern  = @"^\d{2}/\d{2}/\d{4}$";
@@ -148,17 +200,34 @@ namespace puic {
             }
 
         }
+        
+        // ParseDate returns a DateOly object which is the parsed date from given string. we support two date formats
         static DateOnly ParseDate(string s, DateFormat f) {
             DateOnly date;
             if (f == DateFormat.Slash) {
-                date = DateOnly.ParseExact(s, "dd/mm/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                try{
+                    date = DateOnly.ParseExact(s, "dd/mm/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch  {
+                    Console.WriteLine($"Error: Bad date format. Start again");
+                }
+                
             } else if (f == DateFormat.Dash) {
-                date = DateOnly.ParseExact(s, "dd-mm-yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                try {
+                    date = DateOnly.ParseExact(s, "dd-mm-yyyy", System.Globalization.CultureInfo.InvariantCulture);
+
+                }
+                catch {
+                    Console.WriteLine($"Error: Bad date format. Start again");
+                }
             } else {
                 throw new ArgumentException("Wrong format. check again");
             }
             return date;
         }
+        
+        // Login checks the conditions that validate both username and password input.
+        // returns a boolean that determines if the ser is authorized to continue
         static bool Login() {
             try {
                 Console.WriteLine("Enter your username: ");
@@ -171,7 +240,7 @@ namespace puic {
                     unameValid = true;
                 }
                 int psswd;
-                if(Int32.TryParse(Normalize(password ?? "") ?? "", out psswd) && Normalize(password ?? "").Length == 6) {
+                if(Normalize(password ?? "").Length == 6 && Int32.TryParse(Normalize(password ?? "") ?? "", out psswd)) {
                     psswdValid = true;
                 }
 
@@ -187,6 +256,8 @@ namespace puic {
             }
             
         } 
+        
+        // CheckContinue checks to see if the user wants to continue or not, based on whether thy inputed 'Y' or 'N'
         static bool CheckContinue(string s) {
             string yes = "Y";
             string no = "N";
@@ -198,17 +269,19 @@ namespace puic {
                 throw new ArgumentException("'y' or 'n' expected");
             }
         }
+        
+        // Normalize trims the string and makes it all capital
         static string Normalize(string s) {
             return s.Trim().ToUpper();
         }
     } 
-    public enum DateFormat {
+    enum DateFormat {
         Slash,
         Dash,
         Invalid,
     }
 
-    public enum Package
+    enum Package
     {
         Mini,
         AllIclusive,
