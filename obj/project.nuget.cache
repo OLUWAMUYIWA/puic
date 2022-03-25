@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "0jDktHiTz6s/MpiRULetrmkAxM/vwsVV8Ob7nLDLh+4JBwLYIZxaFJIhPDE1fxj3NVK4goxC7MQM7Br7LqQDiQ==",
+  "success": true,
+  "projectFilePath": "/home/fermi/projs/c#/other/puic/puic.csproj",
+  "expectedPackageFiles": [
+    "/home/fermi/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.2/microsoft.aspnetcore.app.ref.6.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,15 @@
+/home/fermi/projs/c#/other/puic/bin/Debug/net6.0/puic
+/home/fermi/projs/c#/other/puic/bin/Debug/net6.0/puic.deps.json
+/home/fermi/projs/c#/other/puic/bin/Debug/net6.0/puic.runtimeconfig.json
+/home/fermi/projs/c#/other/puic/bin/Debug/net6.0/puic.dll
+/home/fermi/projs/c#/other/puic/bin/Debug/net6.0/ref/puic.dll
+/home/fermi/projs/c#/other/puic/bin/Debug/net6.0/puic.pdb
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.csproj.AssemblyReference.cache
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.GeneratedMSBuildEditorConfig.editorconfig
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.AssemblyInfoInputs.cache
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.AssemblyInfo.cs
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.csproj.CoreCompileInputs.cache
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.dll
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/ref/puic.dll
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.pdb
+/home/fermi/projs/c#/other/puic/obj/Debug/net6.0/puic.genruntimeconfig.cache
