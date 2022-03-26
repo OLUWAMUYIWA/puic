@@ -40,25 +40,44 @@ namespace puic {
 
             var dests =  new List<string>(){"NIGERIA", "KENYA", "GREECE", "ARGENTINA", "CANADA", "ISRAEL", "MEXICO", "GERMANY", "JAPAN", "ITALY", "PORTUGAL", "PAIN", "FRANCE", "INDIA", "UKRAINE", "POLAND", "BRITAIN", "SOUTH AFRICA", "PAKISTAN"};
             Console.WriteLine("Would you like to do a Search or Choose from a list of destinations?");
-            Console.WriteLine("If Search, input '1', else input '2'");
-            var option = Console.ReadLine();
             int optionInt;
-            var optionParsed = Int32.TryParse(option, out optionInt);
-            if (!optionParsed) { //comeback
-
-            }
+            var optionAgain = false;
+            do {
+                Console.WriteLine("If Search, input '1', else input '2'");
+                var option = Console.ReadLine();
+                
+                var optionParsed = Int32.TryParse(option, out optionInt);
+                if (!optionParsed || optionInt > 2 || optionInt <1) { 
+                    Console.ForegroundColor = ConsoleColor.Yellow;   
+                    Console.WriteLine("You either chose a non-digit option or a number out of {1,2}");
+                    Console.ResetColor();
+                    optionAgain = true;
+                } else {
+                    optionAgain = false;
+                }
+            } while (optionAgain);
+            
             string chosen = "";
             if (optionInt == 1) { // User chose to search 
-                Console.WriteLine("Input the destination you want to search");
-                var searchInput = Normalize(Console.ReadLine() ?? "");
-                var searchPos = dests.IndexOf(searchInput);
-                
-                if (searchPos == -1) { //comeback
+                var searchDestAgain = false;
+                int searchPos;
+                do {
+                    Console.WriteLine("\nInput the destination you want to search");
+                    var searchInput = Normalize(Console.ReadLine() ?? "");
+                    searchPos = dests.IndexOf(searchInput);
 
-                }
-                chosen = dests[searchPos];
+                    if (searchPos == -1) { // search strig not in the destinations list
+                        Console.ForegroundColor = ConsoleColor.Yellow;   
+                        Console.WriteLine("We're so sorry. Your distination is not on the list");
+                        Console.ResetColor();
+                        searchDestAgain = true;
+                    } else {
+                        searchDestAgain = false;
+                        chosen = dests[searchPos];
+                    }
+                } while (searchDestAgain);
             } else if (optionInt == 2) { //User chose to get the list and select from there
-                Console.WriteLine("Choose from the following destinations:");
+                Console.WriteLine("\nChoose from the following destinations:");
                 var count = 1;
                 foreach (var dest in dests) // print out all the destinations
                 {
@@ -67,7 +86,7 @@ namespace puic {
                 }
                 var numberAgain = false;
                 do {
-                    Console.WriteLine("Give the number that corresponds to the destination of your choice");
+                    Console.WriteLine("\nGive the number that corresponds to the destination of your choice");
                     int choice = 0;
                     try {
                         var parsed = Int32.TryParse(Console.ReadLine(), out choice);
@@ -86,19 +105,17 @@ namespace puic {
                         chosen = dests[choice-1];
                     } 
                 } while (numberAgain);
-            } else { //User chose something different entirely
-            //comeback
-
             }
             
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"You have selected {chosen}. Now choose the dates");
+            Console.WriteLine($"\nYou have selected {chosen}. Now choose the dates");
             Console.ResetColor();
             var dateAgain = false;
             string? beginStr = "";
             DateFormat beginFormat;
+            DateOnly beginDate;
             do {
-                Console.WriteLine("Choose beginning date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
+                Console.WriteLine("\nChoose beginning date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
                 beginStr = Console.ReadLine();
                 beginFormat = GetDateFormat(beginStr ?? "");
                 if (beginFormat == DateFormat.Invalid) {
@@ -106,15 +123,23 @@ namespace puic {
                     dateAgain = true;
                 } else {
                     dateAgain = false;
+                    try {
+                        beginDate = ParseDate(beginStr ?? "", beginFormat);
+
+                    }
+                    catch {
+                        dateAgain = true;
+                        continue;
+                    }
                 }
             } while (dateAgain);
-            var beginDate = ParseDate(beginStr ?? "", beginFormat);
 
             var dateAgain2 = false;
             string? endStr = "";
             DateFormat endFormat;
+            DateOnly endDate;
             do {
-                Console.WriteLine("Choose ending date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
+                Console.WriteLine("\nChoose ending date in the following format: 'dd/mm/yyyy' or 'dd-mm-yyyy'");
                 endStr = Console.ReadLine();
                 endFormat = GetDateFormat(endStr ?? "");
                 if (endFormat == DateFormat.Invalid) {
@@ -124,26 +149,44 @@ namespace puic {
                     dateAgain2 = true;
                 } else {
                     dateAgain2 = false;
+                    try {
+                        endDate = ParseDate(endStr ?? "", endFormat);
+                    }
+                    catch {
+                        dateAgain2 = true;
+                        continue;
+                    }
                 }
             } while (dateAgain2);
-            var endDate = ParseDate(endStr ?? "", endFormat);
-
+            
             Package package;
             try {
                 package = GetPackage(beginDate, endDate);
                 if (package == Package.SeniorCitizens) {
-                    Console.WriteLine("Please input your age");
+                    var ageAgain = false;
                     int age;
-                    bool parsed = Int32.TryParse(Console.ReadLine(), out age);
+                    do {
+                        Console.WriteLine("\nPlease input your age");
+                        bool parsed = Int32.TryParse(Console.ReadLine(), out age);
+                        if (!parsed || age < 0) {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("\nInvalid input");
+                            Console.ResetColor();
+                            ageAgain = true;
+                        } else {
+                            ageAgain = false;
+                        }
+                    } while(ageAgain);
+                    
                     if (age <= 60) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("You are not qualified for this package \nGoodbye!");
+                        Console.WriteLine("\nYou are not qualified for this package \nGoodbye!");
                         Environment.Exit(0);
                     }
                 }
                 int cost = Cost(package);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"You have successfully reserved a {PackageName(package)} spot at PUIC Holidays. \nYour destination is {chosen} \nMake sure you pay the stipulated sum of £{cost} within 7 days");
+                Console.WriteLine($"\nYou have successfully reserved a {PackageName(package)} spot at PUIC Holidays. \nYour destination is {chosen} \nMake sure you pay the stipulated sum of £{cost} within 7 days");
                 Environment.Exit(0);
             }
             catch (Exception e) {
@@ -190,8 +233,8 @@ namespace puic {
                     break;
                 default:
                 package = Package.Invalid;
-                    throw new Exception("Invalid Package Choice. This is because you didn't choose your dates well.");
-                
+                    throw new Exception("\nInvalid Package Choice. This is because you didn't choose your dates well.");
+                         
             }
             return package;
         }
@@ -245,10 +288,11 @@ namespace puic {
                 try{
                     date = DateOnly.ParseExact(s, "dd/mm/yyyy", System.Globalization.CultureInfo.InvariantCulture);
                 }
-                catch  {
+                catch (Exception e)  {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Error: Bad date format. Start again");
+                    Console.WriteLine($"\nError: Bad date format. Start again");
                     Console.ResetColor();
+                    throw new Exception(e.Message);
                 }
                 
             } else if (f == DateFormat.Dash) {
@@ -256,11 +300,11 @@ namespace puic {
                     date = DateOnly.ParseExact(s, "dd-mm-yyyy", System.Globalization.CultureInfo.InvariantCulture);
 
                 }
-                catch {
+                catch (Exception e) {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Error: Bad date format. Start again");
+                    Console.WriteLine($"\nError: Bad date format. Start again");
                     Console.ResetColor();
-
+                    throw new Exception(e.Message);
                 }
             } else {
                 throw new ArgumentException("Wrong format. check again");
